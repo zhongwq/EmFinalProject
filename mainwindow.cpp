@@ -1,17 +1,22 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include<QSqlDatabase>
-#include<QMessageBox>
-#include<QSqlQuery>
-#include<QSqlError>
+#include <QDesktopWidget>
+#include <QSqlDatabase>
+#include <QMessageBox>
+#include <QSqlQuery>
+#include <QSqlError>
+
+#define QStringLiteral(str) QString::fromUtf8(str, sizeof(str) - 1)
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    setWindowTitle(QStringLiteral("SYSU视频监控"));
+    QDesktopWidget *desktop = QApplication::desktop();
+    move((desktop->width() - this->width())/2, (desktop->height() - this->height())/2);
+    setWindowTitle(QStringLiteral("Login"));
     ui->lineEditPass->setEchoMode(QLineEdit::Password);
 
     //添加Sqlite数据库

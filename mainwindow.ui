@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>365</width>
-    <height>269</height>
+    <width>400</width>
+    <height>250</height>
    </rect>
   </property>
   <property name="font">
@@ -21,6 +21,45 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_3">
+    <item row="2" column="0" colspan="2">
+     <spacer name="horizontalSpacer_3">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>70</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="0" column="0">
+     <spacer name="horizontalSpacer_9">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>80</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="3" column="0" colspan="2">
+     <spacer name="horizontalSpacer_11">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>70</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
     <item row="1" column="5">
      <spacer name="horizontalSpacer_6">
       <property name="orientation">
@@ -28,7 +67,7 @@
       </property>
       <property name="sizeHint" stdset="0">
        <size>
-        <width>58</width>
+        <width>50</width>
         <height>20</height>
        </size>
       </property>
@@ -41,20 +80,7 @@
       </property>
       <property name="sizeHint" stdset="0">
        <size>
-        <width>83</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="2" column="0" colspan="3">
-     <spacer name="horizontalSpacer_3">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>96</width>
+        <width>70</width>
         <height>20</height>
        </size>
       </property>
@@ -67,38 +93,11 @@
       </property>
       <property name="sizeHint" stdset="0">
        <size>
-        <width>83</width>
+        <width>70</width>
         <height>20</height>
        </size>
       </property>
      </spacer>
-    </item>
-    <item row="2" column="3">
-     <widget class="QPushButton" name="LoginButton">
-      <property name="text">
-       <string>登     陆</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0" colspan="3">
-     <spacer name="horizontalSpacer_11">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>96</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="3" column="3">
-     <widget class="QPushButton" name="ExitButton">
-      <property name="text">
-       <string>退出</string>
-      </property>
-     </widget>
     </item>
     <item row="1" column="0">
      <spacer name="horizontalSpacer_5">
@@ -107,27 +106,11 @@
       </property>
       <property name="sizeHint" stdset="0">
        <size>
-        <width>51</width>
+        <width>50</width>
         <height>20</height>
        </size>
       </property>
      </spacer>
-    </item>
-    <item row="0" column="2" colspan="3">
-     <widget class="QLabel" name="labeltitle">
-      <property name="font">
-       <font>
-        <family>黑体</family>
-        <pointsize>14</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>SYSU视频监控系统</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
     </item>
     <item row="0" column="5">
      <spacer name="horizontalSpacer_10">
@@ -136,20 +119,7 @@
       </property>
       <property name="sizeHint" stdset="0">
        <size>
-        <width>58</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="0" column="0" colspan="2">
-     <spacer name="horizontalSpacer_9">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>71</width>
+        <width>80</width>
         <height>20</height>
        </size>
       </property>
@@ -181,6 +151,36 @@
       </layout>
      </widget>
     </item>
+    <item row="0" column="1" colspan="4">
+     <widget class="QLabel" name="labeltitle">
+      <property name="font">
+       <font>
+        <family>黑体</family>
+        <pointsize>14</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>SYSU视频监控系统</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="2" colspan="2">
+     <widget class="QPushButton" name="ExitButton">
+      <property name="text">
+       <string>退出</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="2" colspan="2">
+     <widget class="QPushButton" name="LoginButton">
+      <property name="text">
+       <string>登     陆</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -188,18 +188,11 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>365</width>
-     <height>22</height>
+     <width>400</width>
+     <height>26</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuContent">
-    <property name="title">
-     <string>CQUPT成绩管理</string>
-    </property>
-   </widget>
-   <addaction name="menuContent"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
