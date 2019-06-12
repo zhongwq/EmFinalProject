@@ -27,12 +27,16 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     monitor.cpp \
-    monitornetworkservice.cpp
+    monitornetworkservice.cpp \
+    video_device.cpp \
+    v4l2grab.c
 
 HEADERS += \
         mainwindow.h \
     monitor.h \
-    monitornetworkservice.h
+    monitornetworkservice.h \
+    video_device.h \
+    v4l2grab.h
 
 FORMS += \
         mainwindow.ui \
