@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql
+QT       += core gui sql network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -27,14 +27,12 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     monitor.cpp \
-    monitornetworkservice.cpp \
     video_device.cpp \
     v4l2grab.c
 
 HEADERS += \
         mainwindow.h \
     monitor.h \
-    monitornetworkservice.h \
     video_device.h \
     v4l2grab.h
 

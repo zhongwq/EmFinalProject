@@ -3,8 +3,7 @@
 
 class MonitorNetworkService
 {
-public:
-    MonitorNetworkService();
+
 };
 
 #endif // MONITORNETWORKSERVICE_H

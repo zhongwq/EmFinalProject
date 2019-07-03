@@ -42,6 +42,15 @@ Monitor::Monitor(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Monitor) {
     ui->setupUi(this);
+
+    server = new QTcpServer(this);
+    if (!server->listen(QHostAddress::Any, 8080)) {
+        QMessageBox::critical(this, "error", "Listen port 8080 failed");
+        exit(0);
+    }
+
+    connect(server, SIGNAL(newConnection()), this, SLOT(new_client()));
+
     QDesktopWidget *desktop = QApplication::desktop();
     move((desktop->width() - this->width())/2, (desktop->height() - this->height())/2);
     setWindowTitle(QStringLiteral("SYSU视频监控"));
@@ -52,6 +61,52 @@ Monitor::Monitor(QWidget *parent) :
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
     qDebug() << " MainWindow initialize finish";
+}
+
+void Monitor::new_client() {
+    QTcpSocket *client = server->nextPendingConnection();
+    qDebug() << "New Client";
+    connect(client, SIGNAL(disconnected()), this, SLOT(distconnect_client()));
+    connect(client, SIGNAL(readyRead()), this, SLOT(read_data()));
+
+    client->setUserData(0, (QObjectUserData*)new Data);
+    clients.append(client);
+}
+
+void Monitor::distconnect_client() {
+    QTcpSocket *client = qobject_cast<QTcpSocket *>(sender());
+    Data *d = (Data*)client->userData(0);
+
+    clients.removeOne(client);
+}
+
+void Monitor::read_data() {
+    QTcpSocket *client = qobject_cast<QTcpSocket *>(sender());
+    QString str = client->readAll();
+    Data *d = (Data*)client->userData(0);
+    QString s("newImage:%1");
+    qDebug() << "Command: " << str;
+    if (str == "new_request") {
+        if ((d->len) && (d->stats==0)) { //图像大小不为0，表示已更新图像数据了
+            d->stats = 1;
+            client->write(s.arg(d->len).toUtf8());
+            d->len_sent = 0;
+        } else //图像数据还没有更新
+            d->stats = 2; //在定时器的槽函数里发出"newImage..."
+    } else if (str == "ack") {
+        int len_send = P_LEN;
+        if (d->len_sent >= d->len) //如果图像已传输完毕
+            return;
+
+        if ((d->len_sent + P_LEN) > d->len)
+            len_send = d->len - d->len_sent;
+
+        d->len_sent += client->write(d->data+d->len_sent, len_send);
+        if (d->len_sent >= d->len) {
+            d->stats = 0; //传输完毕后，把状态改为可更新
+            d->len = 0;
+        }
+    }
 }
 
 Monitor::~Monitor() {
@@ -94,6 +149,44 @@ void Monitor::update() {
     aa.append((const char *)rgb_frame_buffer, bi.biSizeImage);
 
     pix.loadFromData(aa);
+
+    QString s("newImage:%1");
+
+    for (int i = 0; i < clients.size(); i++) {
+        Data *d = (Data*)clients.at(i)->userData(0);
+        qDebug() << d->stats << ", sendContent outoutside: " << s.arg(d->len).toUtf8();
+
+        if (d->stats != 1) { // 1表示传输中
+            qDebug() << "1: " << d->stats << ", sendContent outside: " << s.arg(d->len).toUtf8();
+            qDebug() << "ImageSize: " << aa.size();
+            memcpy(d->data, aa.data(), aa.size());
+            d->len = aa.size();
+            qDebug() << "2: " << d->stats << ", sendContent outside: " << s.arg(d->len).toUtf8();
+
+            if (d->stats == 2) {
+                d->stats = 1; //改为传输中的状态
+                d->len_sent = 0;
+                for (int i = 0; i < clients.size(); i++) {
+                    Data *d = (Data*)clients.at(i)->userData(0);
+                    qDebug() << "status" << d->stats;
+
+                    if (d->stats != 1) { // 1表示传输中
+                        memcpy(d->data, aa.data(), aa.size());
+                        d->len = aa.size();
+
+                        if (d->stats == 2) {
+                            d->stats = 1; //改为传输中的状态
+                            d->len_sent = 0;
+                            qDebug() << "sendContent inside: " << s.arg(d->len).toUtf8();
+                            clients.at(i)->write(s.arg(d->len).toUtf8());
+                        }
+                    }
+                }
+                clients.at(i)->write(s.arg(d->len).toUtf8());
+            }
+        }
+    }
+
     ui->MonitorView->setPixmap(pix);
 
     if(save_picture_flag == 1)
@@ -133,7 +226,7 @@ void Monitor::on_playButton_released() {
     if(count == 0)
     {
         ui->playButton->setText(_stop);
-        timer->start(30);
+        timer->start(100);
         count = 1;
         ui->saveButton->setEnabled(1);
     }
