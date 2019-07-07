@@ -74,7 +74,7 @@ void MainWindow::on_LoginButton_clicked()
 
     if(select.next()) {
         this->hide();
-        monitor = new Monitor;   //此处有一个数据库连接的大坑
+        monitor = new Monitor;
         this->monitor->show();
     } else {
         QMessageBox::information(this, QStringLiteral("警告！"),QStringLiteral("用户名或密码有误！！！"));

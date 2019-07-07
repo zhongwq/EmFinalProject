@@ -14,6 +14,9 @@
 #include <QtGui>
 #include <QTextEdit>
 #include <QMessageBox>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
@@ -76,7 +79,6 @@ void Monitor::new_client() {
 void Monitor::distconnect_client() {
     QTcpSocket *client = qobject_cast<QTcpSocket *>(sender());
     Data *d = (Data*)client->userData(0);
-
     clients.removeOne(client);
 }
 
@@ -86,7 +88,41 @@ void Monitor::read_data() {
     Data *d = (Data*)client->userData(0);
     QString s("newImage:%1");
     qDebug() << "Command: " << str;
-    if (str == "new_request") {
+    bool flag = false;
+    if (str.indexOf("&") != -1) {
+        QStringList list = str.split('&');
+
+        QSqlDatabase db;
+        if(QSqlDatabase::contains("qt_sql_default_connection"))
+          db = QSqlDatabase::database("qt_sql_default_connection");
+        else
+          db = QSqlDatabase::addDatabase("QSQLITE");
+
+        db.setDatabaseName("../info.db");
+
+        //打开数据库
+        if( !db.open() ) {
+            QMessageBox::warning(this, "错误", db.lastError().text());
+            return;
+        }
+
+        if(!db.open()) {
+            QMessageBox::warning(this, "error", db.lastError().text());
+        }
+
+        bool in=false;
+        QSqlQuery select;
+        QString sql = QString("select * from admin where id = '%1' and password='%2';").arg(list.at(0),list.at(1));
+        in = select.exec(sql);
+
+        if(select.next()) {
+            flag = true;
+        } else {
+            client->write("Error: Login failed! Check your account!");
+        }
+        db.close();
+    }
+    if (flag == true || str == "new_request") {
         if ((d->len) && (d->stats==0)) { //图像大小不为0，表示已更新图像数据了
             d->stats = 1;
             client->write(s.arg(d->len).toUtf8());
@@ -154,21 +190,15 @@ void Monitor::update() {
 
     for (int i = 0; i < clients.size(); i++) {
         Data *d = (Data*)clients.at(i)->userData(0);
-        qDebug() << d->stats << ", sendContent outoutside: " << s.arg(d->len).toUtf8();
 
         if (d->stats != 1) { // 1表示传输中
-            qDebug() << "1: " << d->stats << ", sendContent outside: " << s.arg(d->len).toUtf8();
-            qDebug() << "ImageSize: " << aa.size();
             memcpy(d->data, aa.data(), aa.size());
             d->len = aa.size();
-            qDebug() << "2: " << d->stats << ", sendContent outside: " << s.arg(d->len).toUtf8();
-
             if (d->stats == 2) {
                 d->stats = 1; //改为传输中的状态
                 d->len_sent = 0;
                 for (int i = 0; i < clients.size(); i++) {
                     Data *d = (Data*)clients.at(i)->userData(0);
-                    qDebug() << "status" << d->stats;
 
                     if (d->stats != 1) { // 1表示传输中
                         memcpy(d->data, aa.data(), aa.size());
@@ -177,11 +207,11 @@ void Monitor::update() {
                         if (d->stats == 2) {
                             d->stats = 1; //改为传输中的状态
                             d->len_sent = 0;
-                            qDebug() << "sendContent inside: " << s.arg(d->len).toUtf8();
                             clients.at(i)->write(s.arg(d->len).toUtf8());
                         }
                     }
                 }
+                qDebug() << i << " " << s.arg(d->len).toUtf8();
                 clients.at(i)->write(s.arg(d->len).toUtf8());
             }
         }
