@@ -53,6 +53,7 @@ private:
     QTimer *timer;
     video_device *vd;
     size_t len;
+    int status;
     QTcpServer *server;
     QList<QTcpSocket *> clients;
     unsigned char *yuv_buffer_pointer;

@@ -52,6 +52,8 @@ Monitor::Monitor(QWidget *parent) :
         exit(0);
     }
 
+    status = 0;
+
     connect(server, SIGNAL(newConnection()), this, SLOT(new_client()));
 
     QDesktopWidget *desktop = QApplication::desktop();
@@ -87,7 +89,6 @@ void Monitor::read_data() {
     QString str = client->readAll();
     Data *d = (Data*)client->userData(0);
     QString s("newImage:%1");
-    qDebug() << "Command: " << str;
     bool flag = false;
     if (str.indexOf("&") != -1) {
         QStringList list = str.split('&');
@@ -123,13 +124,39 @@ void Monitor::read_data() {
         db.close();
     }
     if (flag == true || str == "new_request") {
+        qDebug() << "Command: " << str;
+        if (status == 0) {
+            ui->playButton->setText("Stop");
+            timer->start(100);
+            status = 1;
+            ui->saveButton->setEnabled(1);
+        }
         if ((d->len) && (d->stats==0)) { //图像大小不为0，表示已更新图像数据了
             d->stats = 1;
             client->write(s.arg(d->len).toUtf8());
             d->len_sent = 0;
         } else //图像数据还没有更新
             d->stats = 2; //在定时器的槽函数里发出"newImage..."
-    } else if (str == "ack") {
+    } else if (status == 0 && str == "play") {
+        qDebug() << "Command: " << str;
+        ui->playButton->setText("Stop");
+        timer->start(100);
+        status = 1;
+        d->stats = 2;
+        ui->saveButton->setEnabled(1);
+    } else if (status == 1 && str.contains("stop")) {
+        qDebug() << "Command: " << str;
+        ui->playButton->setText("Start");
+        timer->stop();
+        status = 0;
+        ui->saveButton->setEnabled(0);
+    } else if (status == 1 && str.split(":")[0] == "save") {
+        qDebug() << "Command: " << str;
+        qDebug() << str.split(":")[1];
+        save_pic_name =  str.split(":")[1];
+        save_picture_flag = 1;
+    }
+    if (str.contains("ack")) {
         int len_send = P_LEN;
         if (d->len_sent >= d->len) //如果图像已传输完毕
             return;
@@ -249,22 +276,18 @@ void Monitor::update() {
 void Monitor::on_playButton_released() {
     qDebug("PlayButton clicked.");
 
-    static unsigned char count=0;
     QString _start = "Start";
     QString _stop = "Stop";
 
-    if(count == 0)
-    {
+    if(status == 0) {
         ui->playButton->setText(_stop);
         timer->start(100);
-        count = 1;
+        status = 1;
         ui->saveButton->setEnabled(1);
-    }
-    else
-    {
+    } else {
         ui->playButton->setText(_start);
         timer->stop();
-        count = 0;
+        status = 0;
         ui->saveButton->setEnabled(0);
     }
 }

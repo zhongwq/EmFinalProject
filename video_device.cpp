@@ -106,16 +106,8 @@ int video_device::camera_v4l2_setting(int *dev, unsigned int width, unsigned int
     // Set the video format
     if(-1 == video_set_format(*dev, width, height, pixelformat))
     {
-        if(pixelformat == V4L2_PIX_FMT_H264)
-        {
-            fprintf(stderr, " === Set Format Failed : skip for H264 ===  \n");
-            return -1;
-        }
-        else
-        {
-            close(*dev);
-            return -1;
-        }
+        close(*dev);
+        return -1;
     }
 
     // Set the frame rate.
