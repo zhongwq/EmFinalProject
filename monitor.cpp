@@ -46,6 +46,25 @@ Monitor::Monitor(QWidget *parent) :
     ui(new Ui::Monitor) {
     ui->setupUi(this);
 
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    //设置数据库
+    db.setDatabaseName("./info.db");
+
+    //打开数据库
+    if( !db.open() ) //数据库打开失败
+    {
+        QMessageBox::warning(this, "错误", db.lastError().text());
+        return;
+    }
+    //对数据库进行初始化
+    QSqlQuery query;
+    query.exec("DROP TABLE IF EXISTS `admin`;");
+    query.exec("CREATE TABLE `admin` (`id` int(11) NOT NULL DEFAULT '0',`password` text,PRIMARY KEY (`id`));");
+    query.exec("INSERT INTO `admin` VALUES ('10000', '123456');");
+    query.exec("DROP TABLE IF EXISTS `account`;");
+
+    db.close();
+
     server = new QTcpServer(this);
     if (!server->listen(QHostAddress::Any, 8080)) {
         QMessageBox::critical(this, "error", "Listen port 8080 failed");
@@ -99,7 +118,7 @@ void Monitor::read_data() {
         else
           db = QSqlDatabase::addDatabase("QSQLITE");
 
-        db.setDatabaseName("../info.db");
+        db.setDatabaseName("./info.db");
 
         //打开数据库
         if( !db.open() ) {
@@ -123,11 +142,11 @@ void Monitor::read_data() {
         }
         db.close();
     }
-    if (flag == true || str == "new_request") {
+    if (flag == true || str.contains("new_request")) {
         qDebug() << "Command: " << str;
         if (status == 0) {
             ui->playButton->setText("Stop");
-            timer->start(100);
+            timer->start(500);
             status = 1;
             ui->saveButton->setEnabled(1);
         }
@@ -249,7 +268,7 @@ void Monitor::update() {
     if(save_picture_flag == 1)
     {
         save_picture_flag = 0;
-        QFile rgbfile(save_pic_name);
+        QFile rgbfile(save_pic_name + ".bmp");
 
         if(!rgbfile.open(QIODevice::ReadWrite | QIODevice::Text))
         {
@@ -281,7 +300,7 @@ void Monitor::on_playButton_released() {
 
     if(status == 0) {
         ui->playButton->setText(_stop);
-        timer->start(100);
+        timer->start(50);
         status = 1;
         ui->saveButton->setEnabled(1);
     } else {
